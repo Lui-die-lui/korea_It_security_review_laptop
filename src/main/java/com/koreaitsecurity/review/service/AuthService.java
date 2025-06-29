@@ -1,14 +1,12 @@
 package com.koreaitsecurity.review.service;
 
-import com.koreaitsecurity.review.dto.ApiRespDto;
-import com.koreaitsecurity.review.dto.ModifyEmailReqDto;
-import com.koreaitsecurity.review.dto.SigninReqDto;
-import com.koreaitsecurity.review.dto.SignupReqDto;
+import com.koreaitsecurity.review.dto.*;
 import com.koreaitsecurity.review.entity.User;
 import com.koreaitsecurity.review.entity.UserRole;
 import com.koreaitsecurity.review.repository.UserRepository;
 import com.koreaitsecurity.review.repository.UserRoleRepository;
 import com.koreaitsecurity.review.security.jwt.JwtUtil;
+import com.koreaitsecurity.review.security.model.PrincipalUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -68,8 +66,20 @@ public class AuthService {
             User user = modifyEmailReqDto.toEntity(userId);
             int result = userRepository.updateEmail(user);
             return new ApiRespDto<>("success","이메일 수정 성공", result);
+        }
 
-
+        public ApiRespDto<?> modifyPassword(ModifyPasswordReqDto modifyPasswordReqDto, PrincipalUser principalUser) {
+        // principalUser - 현재 시점으로 토큰 정보를 불러오는 객체가 있음. - 원래 비번이 들어있음(old) - 새로 넣는 dto 비번이랑 확인(new)
+            if (!bCryptPasswordEncoder.matches(modifyPasswordReqDto.getOldPassword(),principalUser.getPassword())) { // matches로 두개 비교함
+                return new ApiRespDto<>("failed","사용자 정보를 확인하세요", null);
+            }
+            if (!modifyPasswordReqDto.getNewPassword().equals(modifyPasswordReqDto.getNewPasswordCheck())) { // equals 로 새로 바꾸는 비번이 같은지 한번 체크
+                return new ApiRespDto<>("failed","새 비밀번호가 일치하지 않습니다.",null);
+            }
+            // 암호화 해야함...! - 그 후에 userRepository - updatePassword에 넣어줌
+            String password = bCryptPasswordEncoder.encode(modifyPasswordReqDto.getNewPassword()); // 내가 새로 가져온 비번이 암호문이 됨
+            int result = userRepository.updatePassword(principalUser.getUserId(), password);
+            return new ApiRespDto<>("success","비밀번호 수정 성공",result);
         }
     }
 

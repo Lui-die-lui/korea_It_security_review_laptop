@@ -1,11 +1,14 @@
 package com.koreaitsecurity.review.controller;
 
 import com.koreaitsecurity.review.dto.ModifyEmailReqDto;
+import com.koreaitsecurity.review.dto.ModifyPasswordReqDto;
 import com.koreaitsecurity.review.dto.SigninReqDto;
 import com.koreaitsecurity.review.dto.SignupReqDto;
+import com.koreaitsecurity.review.security.model.PrincipalUser;
 import com.koreaitsecurity.review.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,5 +58,18 @@ public class AuthContoller {
     public ResponseEntity<?> modifyEmail(@PathVariable Integer userId, @RequestBody ModifyEmailReqDto modifyEmailReqDto) {
         return ResponseEntity.ok(authService.modifyEmail(userId, modifyEmailReqDto));
         //토큰이 필요할거고 인증이 되어있어야함 - 로그인 되어있어야 함 - Bearer token 에 토큰값 넣어줘야함!
+    }
+
+    @PostMapping("/password/{userId}")
+    public ResponseEntity<?> modifyPassword(
+            @PathVariable Integer userId, // 이걸로 PrincipalUser(인증 객체) 내의 userId와 비교함 - 아이디가 동일해야 변경 가능하게!
+            @RequestBody ModifyPasswordReqDto modifyPasswordReqDto,
+            @AuthenticationPrincipal PrincipalUser principalUser) { // Principal 객체 들고올때 사용하는 어노테이션(인증 객체 빼옴)
+        if (!userId.equals(principalUser.getUserId())) {
+            return ResponseEntity.badRequest().body("본인의 계정만 변경이 가능합니다."); // 400 에러 뜨면서 메세지 반환 / .ok도 가능
+        }
+        return ResponseEntity.ok(authService.modifyPassword(modifyPasswordReqDto,principalUser));
+        // 이미 검증되었기 때문에 principalUser에서 꺼내 써도 됨
+
     }
 }
