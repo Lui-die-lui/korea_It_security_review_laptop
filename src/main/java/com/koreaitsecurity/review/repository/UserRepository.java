@@ -34,4 +34,8 @@ public class UserRepository {
     public Optional<User> getUserByUsername(String username) {
         return userMapper.getUserByUsername(username);
     }
+
+    public int updateEmail(User user) {
+        return userMapper.updateEmail(user);
+    }
 }

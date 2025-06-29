@@ -1,5 +1,6 @@
 package com.koreaitsecurity.review.controller;
 
+import com.koreaitsecurity.review.dto.ModifyEmailReqDto;
 import com.koreaitsecurity.review.dto.SigninReqDto;
 import com.koreaitsecurity.review.dto.SignupReqDto;
 import com.koreaitsecurity.review.service.AuthService;
@@ -44,6 +45,15 @@ public class AuthContoller {
         return ResponseEntity.ok(SecurityContextHolder.getContext().getAuthentication());
         // 넣어놨던 정보 가져오기 가능
         // 토큰이 없으면 애초에 여기 도달 안됨 - controller의 requestMatchers 에 따로 기입할 필요 없음
+    }
 
+    // 이메일, 패스워드 변경
+    // 패스워드 = 원래 비밀번호가 일치하는지, 바꾼 비번이 일치하는지 한번 더 확인
+    // 이름 중복 - 비즈니스 로직에 유저이름 중복에 대한 검사가 들어가지 않았기 때문
+
+    @PostMapping("/{userId}")
+    public ResponseEntity<?> modifyEmail(@PathVariable Integer userId, @RequestBody ModifyEmailReqDto modifyEmailReqDto) {
+        return ResponseEntity.ok(authService.modifyEmail(userId, modifyEmailReqDto));
+        //토큰이 필요할거고 인증이 되어있어야함 - 로그인 되어있어야 함 - Bearer token 에 토큰값 넣어줘야함!
     }
 }

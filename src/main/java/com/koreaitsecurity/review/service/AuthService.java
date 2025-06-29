@@ -1,6 +1,7 @@
 package com.koreaitsecurity.review.service;
 
 import com.koreaitsecurity.review.dto.ApiRespDto;
+import com.koreaitsecurity.review.dto.ModifyEmailReqDto;
 import com.koreaitsecurity.review.dto.SigninReqDto;
 import com.koreaitsecurity.review.dto.SignupReqDto;
 import com.koreaitsecurity.review.entity.User;
@@ -61,6 +62,14 @@ public class AuthService {
         // 토큰을 만들때 내가 찾아온 String 반환된 User 아이디를 넘겨주게 됨.
         return new ApiRespDto<>("Succcess","로그인 성공",token);
         // 웹 상에서는 F12 -> application -> storage쪽에 담김
+        }
+
+        public ApiRespDto<?> modifyEmail(Integer userId, ModifyEmailReqDto modifyEmailReqDto) {
+            User user = modifyEmailReqDto.toEntity(userId);
+            int result = userRepository.updateEmail(user);
+            return new ApiRespDto<>("success","이메일 수정 성공", result);
+
+
         }
     }
 

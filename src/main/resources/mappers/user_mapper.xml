@@ -7,7 +7,7 @@
     <resultMap id="RoleResultMap" type="com.koreaitsecurity.review.entity.Role">
         <id property="roleId" column="role_id"/>
         <result property="roleName" column="role_name" />
-        <result property="roleNameKor" column="role_name-kor" />
+        <result property="roleNameKor" column="role_name_kor" />
 <!--            property = Entity 클래스 안의 객체들-->
     </resultMap>
 
@@ -27,7 +27,7 @@
         <result property="password" column="password" />
         <result property="email" column="email" />
 <!--        유저 입장 -> 여러가지 권한 가질 수 있음 / 권한 입장 -> 여러 유저에게 사용될 수 있음 = N:M 관계 -->
-        <collection property="userRoles" resultMap="UserRoleResultmap" />
+        <collection property="userRoles" resultMap="UserRoleResultMap" />
 
     </resultMap>
 
@@ -64,25 +64,34 @@
     </select>
     <select id="getUserByUsername" resultMap="UserResultMap">
         SELECT
-        ut.user_id,
-        ut.username,
-        ut.password,
-        ut.email,
+            ut.user_id,
+            ut.username,
+            ut.password,
+            ut.email,
 
-        urt.user_role_id,
-        urt.user_id AS urt_user_id,
-        urt.role_id AS urt_role_id,
-        urt.create_dt,
-        urt.update_dt,
+            urt.user_role_id,
+            urt.user_id AS urt_user_id,
+            urt.role_id AS urt_role_id,
+            urt.create_dt,
+            urt.update_dt,
 
-        rt.role_id,
-        rt.role_name,
-        rt.role_name_kor
+            rt.role_id,
+            rt.role_name,
+            rt.role_name_kor
         FROM
-        user_tb ut
-        left outer join user_role_tb urt on (urt.user_id = ut.user_id)
-        left outer join role_tb rt on(rt.role_id = urt.role_id)
+            user_tb ut
+            left outer join user_role_tb urt on (urt.user_id = ut.user_id)
+            left outer join role_tb rt on(rt.role_id = urt.role_id)
         WHERE
-        ut.username = #{username};
+            ut.username = #{username};
     </select>
+
+    <update id="updateEmail">
+        update
+            user_tb
+        set
+            email = #{email}
+        where
+            user_id = #{userId}
+    </update>
 </mapper>
