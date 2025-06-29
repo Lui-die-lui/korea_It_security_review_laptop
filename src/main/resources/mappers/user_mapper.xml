@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.koreaitsecurity.review.mapper.UserMapper">
+
+    <resultMap id="RoleResultMap" type="com.koreaitsecurity.review.entity.Role">
+        <id property="roleId" column="role_id"/>
+        <result property="roleName" column="role_name" />
+        <result property="roleNameKor" column="role_name-kor" />
+<!--            property = Entity 클래스 안의 객체들-->
+    </resultMap>
+
+    <resultMap id="UserRoleResultMap" type="com.koreaitsecurity.review.entity.UserRole">
+        <id property="userRoleId" column="user_role_id" />
+        <result property="userId" column="urt_user_id" />
+        <result property="roleId" column="urt_role_id" />
+        <result property="createDt" column="create_dt" />
+        <result property="updateDt" column="update_dt" />
+        <association property="role" resultMap="RoleResultMap" />
+<!--        1:N 관계에서는 association 을 사용함-->
+    </resultMap>
+
+    <resultMap id="UserResultMap" type="com.koreaitsecurity.review.entity.User">
+        <id property="userId" column="user_id" />
+        <result property="username" column="username" />
+        <result property="password" column="password" />
+        <result property="email" column="email" />
+<!--        유저 입장 -> 여러가지 권한 가질 수 있음 / 권한 입장 -> 여러 유저에게 사용될 수 있음 = N:M 관계 -->
+        <collection property="userRoles" resultMap="UserRoleResultmap" />
+
+    </resultMap>
+
+    <insert id="addUser" useGeneratedKeys="true" keyProperty="userId">
+<!--        생성된 아이디를 굳이 다시 조회할 필요없이 바로 받아볼 수 있음-->
+        insert into
+            user_tb
+        values (0, #{username}, #{password}, #{email})
+    </insert>
+    <select id="getUserByUserId" resultMap="UserResultMap">
+        SELECT
+            ut.user_id,
+            ut.username,
+            ut.password,
+            ut.email,
+
+            urt.user_role_id,
+            urt.user_id AS urt_user_id,
+            urt.role_id AS urt_role_id,
+            urt.create_dt,
+            urt.update_dt,
+
+            rt.role_id,
+            rt.role_name,
+            rt.role_name_kor
+        FROM
+            user_tb ut
+            left outer join user_role_tb urt on (urt.user_id = ut.user_id)
+            left outer join role_tb rt on(rt.role_id = urt.role_id)
+        WHERE
+        ut.user_id = #{userId};
+<!--        user_tb의 user_id이기때문에 ut.user_id라고 명시해줘야함-->
+
+    </select>
+    <select id="getUserByUsername" resultMap="UserResultMap">
+        SELECT
+        ut.user_id,
+        ut.username,
+        ut.password,
+        ut.email,
+
+        urt.user_role_id,
+        urt.user_id AS urt_user_id,
+        urt.role_id AS urt_role_id,
+        urt.create_dt,
+        urt.update_dt,
+
+        rt.role_id,
+        rt.role_name,
+        rt.role_name_kor
+        FROM
+        user_tb ut
+        left outer join user_role_tb urt on (urt.user_id = ut.user_id)
+        left outer join role_tb rt on(rt.role_id = urt.role_id)
+        WHERE
+        ut.username = #{username};
+    </select>
+</mapper>

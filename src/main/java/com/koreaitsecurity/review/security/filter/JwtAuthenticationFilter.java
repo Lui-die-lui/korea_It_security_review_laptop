@@ -1,0 +1,85 @@
+package com.koreaitsecurity.review.security.filter;
+
+
+import com.koreaitsecurity.review.entity.User;
+import com.koreaitsecurity.review.repository.UserRepository;
+import com.koreaitsecurity.review.security.jwt.JwtUtil;
+import com.koreaitsecurity.review.security.model.PrincipalUser;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+
+@Component
+        public class JwtAuthenticationFilter implements Filter {
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserRepository userRepository;
+
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+                    throws IOException, ServletException {
+                // 전처리 해당 구간
+                HttpServletRequest request = (HttpServletRequest) servletRequest;
+                List<String> methods = List.of("POST", "PUT", "GET","PATCH", "DELETE");
+                if (!methods.contains(request.getMethod())) {
+                    filterChain.doFilter(servletRequest, servletResponse);
+                    return;
+                }
+                String authorization = request.getHeader("Authorization");
+                System.out.println("Bearer 토큰 : " + authorization);
+                if (jwtUtil.isBearer(authorization)) {
+                    String accessToken = jwtUtil.removeBearer(authorization);
+                    // 여기서 Bearer 접두사 존재하는지 확인 -> 있는경우 Bearer 접두사 제거하고 출력됨
+                    try {
+                        Claims claims = jwtUtil.getClaims(accessToken);
+                        // 토큰에서 Claims를 추출
+                        // 이때 서명검증도 같이 진행
+                        // 서명 위조나 만료 시 예외 발생
+                        String id = claims.getId(); // id를 가져올 수 있음 - user테이블의 userid
+                        // UserDeatailsService
+                        Integer userId = Integer.parseInt(id);
+                        Optional<User> optionalUser = userRepository.getUserByUserId(userId);
+                        optionalUser.ifPresentOrElse((user) -> {
+                            // DB에서 조회된 User 객체를 Spring Security 인증 객체(PrincipalUser) 로 변환
+                            // UuserDetails
+                            PrincipalUser principalUser = PrincipalUser.builder()
+                                    .userId(user.getUserId())
+                                    .username(user.getUsername())
+                                    .password(user.getPassword())
+                                    .email(user.getEmail())
+                                    .userRoles(user.getUserRoles())
+                                    .build();
+                            // UsernamePasswordAuthenticationToken 직접 생성
+                            Authentication authentication = new UsernamePasswordAuthenticationToken(principalUser,"",principalUser.getAuthorities());
+                            // 이미 앞에서(get claims) 인증이 완료된 상태
+                            // spring security의 인증 컨텍스트에 인증 객체 저장 -> 이후 요청은 인증된 사용자로 간주됨
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                            System.out.println("인증 완료");
+                            System.out.println(authentication.getName());
+                        }, () -> {
+                            throw new AuthenticationServiceException("인증 실패");
+                        });
+                    } catch (RuntimeException e) {
+                        e.printStackTrace();
+                    } // 이거 다시 좀 보기...
+                }
+                //인증 실패든 성공이든 필터링을 중단하지 않고 다음 필터로 넘어감
+//                System.out.println("전처리"); // 전처리에 토큰 인증을 해야함 -들어올때 확인 해야하니까
+                filterChain.doFilter(servletRequest,servletResponse); // 전-전처리 , 후-후처리
+                System.out.println("후처리");
+
+    }
+}
