@@ -38,7 +38,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         // OAuth2PrincipalUserService 내 return 값으로 지정되어있음. - getPrincipal로 가져옴
         String provider = defaultOAuth2User.getAttribute("provider");
         String providerUserId = defaultOAuth2User.getAttribute("id");
-        String email =defaultOAuth2User.getAttribute("email");
+        String email = defaultOAuth2User.getAttribute("email");
         // provider, providerUserId 이미 연동된 사용자 정보가 있는지 DB 조회 - Repository 만들고 사용가능
         // 만든 OAuth2User 사용해야함
         OAuth2User oAuth2User = oAuth2UserRepository.getOAuth2UserByProviderAndProviderUserId(provider, providerUserId);

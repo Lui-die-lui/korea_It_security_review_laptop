@@ -31,7 +31,7 @@ public class OAuth2PrincipalUserService extends DefaultOAuth2UserService {
         String provider = userRequest.getClientRegistration().getRegistrationId();
 
         // 로그인한 사용자의 식별자(id), 이메일
-        // 로그인 시 사ㅏ용한 이메일
+        // 로그인 시 사용한 이메일
         String email = null;
         // 공급처에서 발행한 사용자 식별자
         String id = null;

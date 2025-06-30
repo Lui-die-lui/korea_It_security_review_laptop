@@ -42,4 +42,9 @@ public class UserRepository {
     public int updatePassword(Integer userId, String password) {
         return userMapper.updatePassword(userId, password);
     }
+
+    public Optional<User> getUserByEmail(String email) {
+        return userMapper.getUserByEmail(email);
+    }
+
 }
