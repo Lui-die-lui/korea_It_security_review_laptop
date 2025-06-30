@@ -13,10 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Optional;
 
+@Component // bean 등록 시켜줘야함 - 자동으로 사용하려면 필수
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     @Autowired // DB 확인용
@@ -39,12 +41,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String email =defaultOAuth2User.getAttribute("email");
         // provider, providerUserId 이미 연동된 사용자 정보가 있는지 DB 조회 - Repository 만들고 사용가능
         // 만든 OAuth2User 사용해야함
-        OAuth2User oAuth2User = oAuth2UserRepository.getOAuth2UserByProviderAndProviderUSerId(provider, providerUserId);
+        OAuth2User oAuth2User = oAuth2UserRepository.getOAuth2UserByProviderAndProviderUserId(provider, providerUserId);
 
         // 만약 oauth2user가 없으면,(oauth2로그인을 통해 회원가입이 되어있지 않거나 아직 연동되지 않은 상태)
         if(oAuth2User == null) {
-            // 프론트로 provider와 providerUserId, email 전달
-            response.sendRedirect("http//localhost:3000/auth/oauth2?provider=" + provider + "&providerUserId="+
+            // 프론트로 provider와 aproviderUserId, email 전달
+            response.sendRedirect("http://localhost:3000/auth/oauth2?provider=" + provider + "&providerUserId="+
                     providerUserId + "&email=" + email); // 리액트로 보냈다는 가정 하에
             return;
         }
@@ -59,7 +61,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         }
 
         // 최종적으로 accessToken을 쿼리 파라미터로 프론트에 전달
-        response.sendRedirect("http://localhost:3000/auth/oath2/signin?accesToken=" + accessToken);
+        response.sendRedirect("http://localhost:3000/auth/oauth2/signin?accessToken=" + accessToken);
         // 프론트에서 꺼내옴 - 로그인처리 완료 (controller 에 도달하기 전 처리 완료)
     }
 }

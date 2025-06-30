@@ -11,8 +11,8 @@ public class OAuth2UserRepository {
     @Autowired
     private OAuth2UserMapper oAuth2UserMapper;
 
-    public OAuth2User getOAuth2UserByProviderAndProviderUSerId(String provider, String providerUserId) {
-        return oAuth2UserMapper.getOAuth2UserByProviderAndProviderUSerId(provider, providerUserId);
+    public OAuth2User getOAuth2UserByProviderAndProviderUserId(String provider, String providerUserId) {
+        return oAuth2UserMapper.getOAuth2UserByProviderAndProviderUserId(provider, providerUserId);
     }
 
 }

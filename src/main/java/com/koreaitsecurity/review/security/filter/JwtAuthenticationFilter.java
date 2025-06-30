@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-
+//AuthenticationFilter룰 대체
 @Component
         public class JwtAuthenticationFilter implements Filter {
 
@@ -31,8 +31,10 @@ import java.util.Optional;
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
                     throws IOException, ServletException {
-                // 전처리 해당 구간
                 HttpServletRequest request = (HttpServletRequest) servletRequest;
+
+                // 전처리 해당 구간
+                // 해당 메소드가 아니면 그냥 다음 필터로 넘김
                 List<String> methods = List.of("POST", "PUT", "GET","PATCH", "DELETE");
                 if (!methods.contains(request.getMethod())) {
                     filterChain.doFilter(servletRequest, servletResponse);

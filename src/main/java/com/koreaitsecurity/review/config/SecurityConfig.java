@@ -82,7 +82,10 @@ public class SecurityConfig {
             auth.requestMatchers("/auth/test").hasRole("ADMIN"); // 어드민 권한이어야 test 요청 가능
             // 권한을 ROLE_ADMIN, ROLE_USER처럼 저장했다면 -> hasRole("ADMIN") 가능
             // 권한을 그냥 ADMIN, USER 이렇게 저장했다면 -> hasAuthority("ADMIN") 사용
-            auth.requestMatchers("/auth/signup","/auth/signin").permitAll();
+            auth.requestMatchers("/auth/signup",
+                    "/auth/signin",
+                    "/oauth2/**",
+                    "/login/oauth2/**").permitAll();
             auth.anyRequest().authenticated(); // pattern에 등록된 게 아니면 전부 인증 절차를 거쳐야 한다.
         });
 
