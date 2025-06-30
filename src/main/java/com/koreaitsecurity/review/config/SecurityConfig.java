@@ -1,6 +1,8 @@
 package com.koreaitsecurity.review.config;
 
 import com.koreaitsecurity.review.security.filter.JwtAuthenticationFilter;
+import com.koreaitsecurity.review.security.handler.OAuth2SuccessHandler;
+import com.koreaitsecurity.review.service.OAuth2PrincipalUserService;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +22,12 @@ public class SecurityConfig {
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private OAuth2PrincipalUserService oAuth2PrincipalUserService;
+
+    @Autowired
+    private OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean // IOC 컨테이너 객체 등록 - 다른곳에서 Autowired해서 쓸 수 있음
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -77,6 +85,20 @@ public class SecurityConfig {
             auth.requestMatchers("/auth/signup","/auth/signin").permitAll();
             auth.anyRequest().authenticated(); // pattern에 등록된 게 아니면 전부 인증 절차를 거쳐야 한다.
         });
+
+        // 요청이 들어오면 Spring Security의 filterChain을 탄다
+        // 여기서 여러 필터 중 하ㅏ나가 Oauth2를 감지
+        // 감지되면 해당 provider의 로그인 페이지로 리디렉션 함
+        http.oauth2Login(oauth2 -> oauth2
+                        //OAuth2 로그인 요청이 성공하고 사용자 정보를 가져오는 과정 설정
+                .userInfoEndpoint(userInfo ->
+                        //사용자 정보 요청이 완료가 되면 이 커스텀 서비스로 OAuth2User를 처리하겠다고 설청
+                        userInfo.userService(oAuth2PrincipalUserService))
+                        // OAuth2인증이 최종적으로 성공한 후 (사용자 정보 파싱이 끝난 후) 실행할 핸들러 설정
+                .successHandler(oAuth2SuccessHandler));
+
+
         return http.build();
+
     }
 }
