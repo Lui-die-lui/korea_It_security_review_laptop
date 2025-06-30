@@ -60,5 +60,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         // 최종적으로 accessToken을 쿼리 파라미터로 프론트에 전달
         response.sendRedirect("http://localhost:3000/auth/oath2/signin?accesToken=" + accessToken);
+        // 프론트에서 꺼내옴 - 로그인처리 완료 (controller 에 도달하기 전 처리 완료)
     }
 }
