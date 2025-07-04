@@ -1,6 +1,7 @@
 package com.koreaitsecurity.review.service;
 
 import com.koreaitsecurity.review.dto.ApiRespDto;
+import com.koreaitsecurity.review.dto.OAuth2MergeReqDto;
 import com.koreaitsecurity.review.dto.OAuth2SignupReqDto;
 import com.koreaitsecurity.review.entity.User;
 import com.koreaitsecurity.review.entity.UserRole;
@@ -44,5 +45,19 @@ public class OAuth2AuthService {
         oAuth2UserRepository
                 .insertOAuth2User(oAuth2SignupReqDto.toOAuth2User(user.get().getUserId()));
         return new ApiRespDto<>("success","OAuth2 회원가입 완료",null);
+    }
+
+    // 기존 사용자와 OAuth2 사용자 병합
+    public ApiRespDto<?> merge(OAuth2MergeReqDto oAuth2MergeReqDto) {
+        Optional<User> optionalUser = userRepository.getUserByUsername(oAuth2MergeReqDto.getUsername());
+        if (optionalUser.isEmpty()) { // 만약 유저명이 없다면
+            return new ApiRespDto<>("failed", "사용자 정보를 확인하세요.",null);
+        }
+        if (!bCryptPasswordEncoder.matches(oAuth2MergeReqDto.getPassword(), optionalUser.get().getPassword())) {
+            // 만약 비번이 일치하지 않는다면
+            return new ApiRespDto<>("failed", "사용자 정보를 확인하세요.",null);
+        }
+        oAuth2UserRepository.insertOAuth2User(oAuth2MergeReqDto.toOAuth2User(optionalUser.get().getUserId()));
+        return new ApiRespDto<>("success", "회원가입이 완료되었습니다.",null);
     }
 }

@@ -28,7 +28,16 @@ public class JwtUtil {
                 // 1000L = 1초를 밀리초
                 // 60 * 60 * 24 * 30 -> 30일
                 .signWith(KEY) // 토큰에 서명을 적용
-                .compact(); // 설정한 JWT 내용응ㄹ 바탕으로 최종적으로 문자열 형태의 JWT생성
+                .compact(); // 설정한 JWT 내용을 바탕으로 최종적으로 문자열 형태의 JWT생성
+    }
+
+    public String generateMailVerifyToken(String id) {
+        return Jwts.builder()
+                .subject("VerifyToken")
+                .id(id)
+                .expiration(new Date(new Date().getTime()+(1000L * 60L * 3L)))
+                .signWith(KEY)
+                .compact();
     }
 
     public boolean isBearer(String token) {

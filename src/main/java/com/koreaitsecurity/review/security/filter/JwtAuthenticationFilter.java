@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 //AuthenticationFilter룰 대체
 @Component
-        public class JwtAuthenticationFilter implements Filter {
+public class JwtAuthenticationFilter implements Filter {
 
     @Autowired
     private JwtUtil jwtUtil;

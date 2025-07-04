@@ -28,6 +28,7 @@ public class AuthService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    // 유저 추가(회원가입)
     public ApiRespDto<?> addUser(SignupReqDto signupReqDto) { // 무조건 암호화 시켜야함(config의 BCryptPasswordEncoder)
         Optional<User> optionalUser = userRepository.addUser(signupReqDto.toEntity(bCryptPasswordEncoder));
         // 만들어진 유저 아이디를 가지고 userRole(유저의 역할)을 만듦. 그래서 userRole도 같이 추가해줘야함.
@@ -40,6 +41,7 @@ public class AuthService {
         return new ApiRespDto<>("success","회원가입 성공",optionalUser);
     }
 
+    // 로그인
     public ApiRespDto<?> signin(SigninReqDto signinReqDto) {
         Optional<User> optionalUser = userRepository.getUserByUsername(signinReqDto.getUsername());
         //Dto안에 있는 get username을 반환 - 갑시 있으면 optionalUser로 들어옴
@@ -55,19 +57,20 @@ public class AuthService {
         System.out.println("로그인 성공");
         // 세션 무상태로 작업하기 때문에 Filter작업으로 다 뜯어고침 - jwt token을 발행
         // 유저에게 토큰을 발행해주어야하기때문에 ApiRespDto 내에 token을 넣어줘야함
-
         String token = jwtUtil.generateAccessToken(user.getUserId().toString()); //user객체에서 가져온 UserId는 Integer
         // 토큰을 만들때 내가 찾아온 String 반환된 User 아이디를 넘겨주게 됨.
-        return new ApiRespDto<>("Succcess","로그인 성공",token);
+        return new ApiRespDto<>("succcess","로그인 성공",token);
         // 웹 상에서는 F12 -> application -> storage쪽에 담김
         }
 
+        // 이메일 수정
         public ApiRespDto<?> modifyEmail(Integer userId, ModifyEmailReqDto modifyEmailReqDto) {
             User user = modifyEmailReqDto.toEntity(userId);
             int result = userRepository.updateEmail(user);
             return new ApiRespDto<>("success","이메일 수정 성공", result);
         }
 
+        // 비밀번호 변경
         public ApiRespDto<?> modifyPassword(ModifyPasswordReqDto modifyPasswordReqDto, PrincipalUser principalUser) {
         // principalUser - 현재 시점으로 토큰 정보를 불러오는 객체가 있음. - 원래 비번이 들어있음(old) - 새로 넣는 dto 비번이랑 확인(new)
             if (!bCryptPasswordEncoder.matches(modifyPasswordReqDto.getOldPassword(),principalUser.getPassword())) { // matches로 두개 비교함
